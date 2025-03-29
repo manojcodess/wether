@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #333436;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.5s ease-in-out;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+        }
+        input, button {
+            width: 50%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .weather-info {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Weather App</h2>
+        <input type="text" id="locationInput" placeholder="Enter city name">
+        <button id="searchButton">Get Weather</button>
+        <div class="weather-info" id="weatherInfo">
+            <h3 id="location"></h3>
+            <p id="temperature"></p>
+            <p id="description"></p>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = '5796abbde9106b7da4febfae8c44c232'; 
+        const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const location = document.getElementById('locationInput').value.trim();
+            if (!location) {
+                alert("Please enter a city name!");
+                return;
+            }
+            fetchWeather(location);
+        });
+
+        function fetchWeather(location) {
+            const url = `${apiUrl}?q=${location}&appid=${apiKey}&units=metric`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cod !== 200) {
+                        alert("❌ City not found! Try again.");
+                        return;
+                    }
+
+                    document.getElementById('location').textContent = `📍 ${data.name}, ${data.sys.country}`;
+                    document.getElementById('temperature').textContent = `🌡️ ${Math.round(data.main.temp)}°C`;
+                    document.getElementById('description').textContent = `🌤️ ${data.weather[0].description}`;
+                    document.getElementById('weatherInfo').style.display = 'block';
+
+                    // Backgrounds mapped to weather conditions
+                    const backgrounds = {
+                        clear: "url('https://source.unsplash.com/1600x900/?sunny')",
+                        clouds: "url('https://source.unsplash.com/1600x900/?cloudy')",
+                        rain: "url('https://source.unsplash.com/1600x900/?rain')",
+                        thunderstorm: "url('https://source.unsplash.com/1600x900/?thunderstorm')",
+                        snow: "url('https://source.unsplash.com/1600x900/?snow')",
+                        default: "url('https://source.unsplash.com/1600x900/?weather')"
+                    };
+
+                    // Get weather condition and apply background
+                    let weather = data.weather[0].main.toLowerCase();
+                    document.body.style.background = (backgrounds[weather] || backgrounds.default) + " no-repeat center center fixed";
+                    document.body.style.backgroundSize = "cover";
+                })
+                .catch(error => alert("❌ Failed to fetch weather data."));
+        }
+    </script>
+
+</body>
+</html>
